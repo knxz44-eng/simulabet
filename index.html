@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SimulaBet — Plataforma de apostas simuladas</title>
+<meta name="description" content="SimulaBet: plataforma gratuita para montar e testar bilhetes de futebol sem dinheiro real.">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#07111f;color:#f4f7fb}
+header{background:#0b1728;border-bottom:1px solid #20324b;padding:16px 5%;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.logo{font-size:24px;font-weight:800}.logo span{color:#27d17f}.badge{font-size:12px;background:#16263c;padding:7px 10px;border-radius:20px;color:#9db1c9}
+main{max-width:1200px;margin:28px auto;padding:0 18px}.hero{background:linear-gradient(135deg,#0d1d32,#102b39);padding:28px;border-radius:18px;margin-bottom:22px}.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;color:#aebed1}
+.layout{display:grid;grid-template-columns:1fr 340px;gap:20px}.card{background:#0d1929;border:1px solid #1d3048;border-radius:15px;padding:18px;margin-bottom:14px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters button,.market button{border:0;border-radius:8px;padding:9px 12px;background:#182a41;color:#d9e5f2;cursor:pointer}.filters button.active{background:#27d17f;color:#06150e;font-weight:700}
+.match{display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center}.league{font-size:12px;color:#8299b2;text-transform:uppercase}.teams{font-size:17px;font-weight:700;margin:7px 0}.date{font-size:12px;color:#8fa4bb}
+.market{display:flex;gap:8px;flex-wrap:wrap}.market button{min-width:82px}.market button:hover{background:#21405c}.market small{display:block;color:#8fa4bb;font-size:10px}
+.slip{position:sticky;top:86px;height:max-content}.slip h2{margin-top:0}.empty{color:#8fa4bb;font-size:14px}.pick{border-bottom:1px solid #1d3048;padding:11px 0}.pick strong{display:block}.pick span{font-size:12px;color:#91a6bd}.total{display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin-top:15px}.green{color:#27d17f}.clear{width:100%;margin-top:14px;padding:11px;border:0;border-radius:9px;background:#263950;color:#fff;cursor:pointer}.sim{width:100%;margin-top:8px;padding:13px;border:0;border-radius:9px;background:#27d17f;color:#06150e;font-weight:800;cursor:pointer}
+footer{text-align:center;color:#71869e;padding:30px;font-size:12px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.slip{position:static}}
+</style>
+</head>
+<body>
+<header><div class="logo">Simula<span>Bet</span></div><div class="badge">100% SIMULAÇÃO • SEM DINHEIRO REAL</div></header>
+<main>
+<section class="hero"><h1>Monte seus bilhetes</h1><p>Teste mercados, odds e combinações para estudar suas análises. Nenhum depósito, saque ou aposta com dinheiro real.</p></section>
+<div class="layout">
+<section>
+<div class="filters"><button class="active" onclick="filterGames('todos',this)">Todos</button><button onclick="filterGames('hoje',this)">Hoje</button><button onclick="filterGames('amanha',this)">Amanhã</button></div>
+<div id="games"></div>
+</section>
+<aside class="card slip"><h2>Meu bilhete</h2><div id="slip"><div class="empty">Clique em uma odd para adicionar ao bilhete.</div></div><div class="total"><span>Odd total</span><span class="green" id="total">1.00</span></div><button class="clear" onclick="clearSlip()">Limpar bilhete</button><button class="sim" onclick="simulate()">SIMULAR BILHETE</button></aside>
+</div>
+</main>
+<footer>SimulaBet © 2026 — projeto educacional. Não aceita dinheiro, depósitos ou saques.</footer>
+<script>
+const games=[
+{id:1,day:'hoje',league:'Champions Feminina',teams:'Arsenal Feminino × Lyon Feminino',time:'16:00',markets:[['Mais de 1.5 gols','1.35'],['Mais de 8.5 escanteios','1.55'],['Arsenal +0.5 gols','1.22'],['Mais de 2.5 cartões','1.62']]},
+{id:2,day:'hoje',league:'Champions Feminina',teams:'Barcelona Feminino × Roma Feminino',time:'16:00',markets:[['Barcelona vence','1.28'],['Mais de 2.5 gols','1.48'],['Barcelona +1.5 gols','1.36'],['Mais de 7.5 escanteios','1.52']]},
+{id:3,day:'hoje',league:'Futebol Internacional',teams:'Noruega × Dinamarca',time:'19:00',markets:[['Mais de 0.5 gols','1.12'],['Mais de 8.5 escanteios','1.60'],['Mais de 2.5 cartões','1.58'],['Mais de 1.5 gols','1.44']]},
+{id:4,day:'amanha',league:'Futebol Internacional',teams:'Brasil × Argentina',time:'21:30',markets:[['Mais de 1.5 gols','1.42'],['Mais de 7.5 escanteios','1.55'],['Mais de 2.5 cartões','1.50'],['Ambas marcam','1.78']]},
+{id:5,day:'amanha',league:'La Liga',teams:'Real Madrid × Elche',time:'16:00',markets:[['Real Madrid vence','1.25'],['Real Madrid +4.5 chutes no gol','1.70'],['Mais de 2.5 gols','1.47'],['Mais de 8.5 escanteios','1.58']]}
+];
+let slip=[];
+function render(filter='todos'){
+ const box=document.getElementById('games'); box.innerHTML='';
+ games.filter(g=>filter==='todos'||g.day===filter).forEach(g=>{
+  const el=document.createElement('div');el.className='card';
+  el.innerHTML=`<div class="match"><div><div class="league">${g.league}</div><div class="teams">${g.teams}</div><div class="date">${g.time} • odds de demonstração</div></div><div>⚽</div></div><hr style="border:0;border-top:1px solid #1d3048;margin:15px 0"><div class="market">${g.markets.map((m,i)=>`<button onclick="addPick(${g.id},${i})"><small>${m[0]}</small><b>${m[1]}</b></button>`).join('')}</div>`;
+  box.appendChild(el);
+ });
+}
+function filterGames(f,b){document.querySelectorAll('.filters button').forEach(x=>x.classList.remove('active'));b.classList.add('active');render(f)}
+function addPick(id,i){const g=games.find(x=>x.id===id),m=g.markets[i];const key=id+'-'+i;if(slip.some(x=>x.key===key))return;slip.push({key,game:g.teams,market:m[0],odd:parseFloat(m[1])});renderSlip()}
+function renderSlip(){const box=document.getElementById('slip');if(!slip.length){box.innerHTML='<div class="empty">Clique em uma odd para adicionar ao bilhete.</div>';document.getElementById('total').textContent='1.00';return}box.innerHTML=slip.map((p,i)=>`<div class="pick"><strong>${p.market} @ ${p.odd.toFixed(2)}</strong><span>${p.game}</span><button onclick="removePick(${i})" style="float:right;background:none;border:0;color:#ff7d7d;cursor:pointer">×</button></div>`).join('');document.getElementById('total').textContent=slip.reduce((a,p)=>a*p.odd,1).toFixed(2)}
+function removePick(i){slip.splice(i,1);renderSlip()}function clearSlip(){slip=[];renderSlip()}
+function simulate(){if(!slip.length){alert('Adicione pelo menos uma seleção ao bilhete.');return}alert('SIMULAÇÃO: bilhete registrado apenas para estudo. Nenhum dinheiro real foi apostado.');}
+render();renderSlip();
+</script>
+</body>
+</html>
