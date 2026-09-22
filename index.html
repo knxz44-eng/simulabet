@@ -614,117 +614,91 @@ footer {
    JOGOS
 ========================= */
 
-const games = [
+let games = [];
 
-  {
-    id: 1,
-    day: "hoje",
-    league: "Champions Feminina",
-    teams: "Arsenal Feminino × Lyon Feminino",
-    time: "16:00",
+async function loadGames() {
+  try {
+    const response = await fetch(
+      "https://sportscore.com/api/widget/matches/?sport=football&limit=50"
+    );
 
-    markets: [
+    const data = await response.json();
 
-      ["Mais de 1.5 gols", "1.35"],
-      ["Mais de 8.5 escanteios", "1.55"],
-      ["Arsenal +0.5 gols", "1.22"],
-      ["Mais de 2.5 cartões", "1.62"],
-      ["Arsenal vence", "1.48"]
+    games = data.matches.map((match, index) => {
 
-    ]
-  },
+      const matchDate = new Date(match.time);
 
-  {
-    id: 2,
-    day: "hoje",
-    league: "Champions Feminina",
-    teams: "Barcelona Feminino × Roma Feminino",
-    time: "16:00",
+      const brazilTime = matchDate.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "America/Sao_Paulo"
+      });
 
-    markets: [
+      const today = new Date();
+      const tomorrow = new Date();
 
-      ["Barcelona vence", "1.28"],
-      ["Mais de 2.5 gols", "1.48"],
-      ["Barcelona +1.5 gols", "1.36"],
-      ["Mais de 7.5 escanteios", "1.52"],
-      ["Ambas marcam", "1.72"]
+      tomorrow.setDate(today.getDate() + 1);
 
-    ]
-  },
+      const matchDay = matchDate.toLocaleDateString("pt-BR", {
+        timeZone: "America/Sao_Paulo"
+      });
 
-  {
-    id: 3,
-    day: "hoje",
-    league: "Futebol Internacional",
-    teams: "Noruega × Dinamarca",
-    time: "19:00",
+      const todayDate = today.toLocaleDateString("pt-BR");
+      const tomorrowDate = tomorrow.toLocaleDateString("pt-BR");
 
-    markets: [
+      let day = "outro";
 
-      ["Mais de 0.5 gols", "1.12"],
-      ["Mais de 8.5 escanteios", "1.60"],
-      ["Mais de 2.5 cartões", "1.58"],
-      ["Mais de 1.5 gols", "1.44"],
-      ["Ambas marcam", "1.75"]
+      if (matchDay === todayDate) {
+        day = "hoje";
+      } else if (matchDay === tomorrowDate) {
+        day = "amanha";
+      }
 
-    ]
-  },
+      return {
+        id: index + 1,
 
-  {
-    id: 4,
-    day: "amanha",
-    league: "Futebol Internacional",
-    teams: "Brasil × Argentina",
-    time: "21:30",
+        day: day,
 
-    markets: [
+        league: match.competition,
 
-      ["Mais de 1.5 gols", "1.42"],
-      ["Mais de 7.5 escanteios", "1.55"],
-      ["Mais de 2.5 cartões", "1.50"],
-      ["Ambas marcam", "1.78"],
-      ["Mais de 3.5 cartões", "1.85"]
+        teams: `${match.home} × ${match.away}`,
 
-    ]
-  },
+        time: brazilTime,
 
-  {
-    id: 5,
-    day: "amanha",
-    league: "La Liga",
-    teams: "Real Madrid × Elche",
-    time: "16:00",
+        status: match.status,
 
-    markets: [
+        statusText: match.status_text,
 
-      ["Real Madrid vence", "1.25"],
-      ["Real Madrid +4.5 chutes no gol", "1.70"],
-      ["Mais de 2.5 gols", "1.47"],
-      ["Mais de 8.5 escanteios", "1.58"],
-      ["Real Madrid +1.5 gols", "1.36"]
+        homeScore: match.home_score,
 
-    ]
-  },
+        awayScore: match.away_score,
 
-  {
-    id: 6,
-    day: "amanha",
-    league: "Premier League",
-    teams: "Liverpool × Tottenham",
-    time: "17:00",
+        homeLogo: match.home_logo,
 
-    markets: [
+        awayLogo: match.away_logo,
 
-      ["Liverpool vence", "1.55"],
-      ["Mais de 2.5 gols", "1.62"],
-      ["Mais de 8.5 escanteios", "1.57"],
-      ["Ambas marcam", "1.60"],
-      ["Mais de 3.5 cartões", "1.72"]
+        markets: [
+          ["Mais de 0.5 gols", "1.20"],
+          ["Mais de 1.5 gols", "1.45"],
+          ["Mais de 2.5 gols", "1.70"],
+          ["Ambas marcam", "1.75"],
+          [`${match.home} vence`, "1.50"]
+        ]
+      };
+    });
 
-    ]
+    render(filter, search);
+
+  } catch (error) {
+
+    console.error("Erro ao carregar partidas:", error);
+
   }
+}
 
-];
+loadGames();
+
+setInterval(loadGames, 60000);
 
 
 /* =========================
